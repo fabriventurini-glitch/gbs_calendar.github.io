@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendario dell'Avvento Magico</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Great Vibes & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Outfit:wght@300;400;600;700;800&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% 20%, #2b0b14 0%, #150509 60%, #0a0104 100%);
+      color: #f7eedd;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .font-holiday {
+      font-family: 'Great Vibes', cursive;
+    }
+
+    .font-cinzel {
+      font-family: 'Cinzel', serif;
+    }
+
+    /* Card Caselle Pulite ed Eleganti (Senza sportello 3D persistente) */
+    .calendar-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.5);
+    }
+
+    .calendar-card:hover:not(.locked) {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 14px 28px -4px rgba(212, 175, 55, 0.25);
+    }
+
+    .calendar-card:active:not(.locked) {
+      transform: scale(0.97);
+    }
+
+    /* Neve animata in background */
+    #snow-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Brillantini dorati */
+    .gold-gradient {
+      background: linear-gradient(135deg, #f5df88 0%, #d4af37 50%, #aa820a 100%);
+    }
+
+    .gold-text {
+      background: linear-gradient(135deg, #ffeaa7 0%, #d4af37 60%, #b8860b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #1a060a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #8b1e2a;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="relative flex flex-col items-center justify-between min-h-screen px-4 py-8">
+
+  <!-- Canvas Neve -->
+  <canvas id="snow-canvas"></canvas>
+
+  <div class="relative z-10 w-full max-w-6xl mx-auto flex flex-col items-center">
+    
+    <!-- Barra Superiore: Toggle Test Mode & Stato Data -->
+    <header class="w-full flex flex-col md:flex-row items-center justify-between gap-4 mb-6 p-4 rounded-2xl bg-white/5 border border-amber-500/20 backdrop-blur-md shadow-2xl">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-red-950/80 border border-amber-400/40 flex items-center justify-center text-amber-400">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-xs uppercase tracking-widest text-amber-300 font-semibold">Oggi è</span>
+          <p id="current-date-display" class="text-sm font-medium text-amber-100">Caricamento...</p>
+        </div>
+      </div>
+
+      <!-- Titolo Desktop Piccolo o Sottotitolo -->
+      <div class="text-center hidden md:block">
+        <span class="text-xs tracking-widest text-amber-300/80 uppercase font-semibold">24 Giorni di Meraviglia</span>
+      </div>
+
+      <!-- Test Mode Controller -->
+      <div class="flex items-center gap-3 bg-red-950/50 px-4 py-2 rounded-xl border border-amber-500/30">
+        <label for="test-mode-toggle" class="text-xs md:text-sm text-amber-200 cursor-pointer select-none flex items-center gap-2">
+          <i data-lucide="key-round" class="w-4 h-4 text-amber-400"></i>
+          <span>Sblocca Tutte (Test Mode):</span>
+        </label>
+        <button id="test-mode-toggle" class="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-700 transition-colors focus:outline-none">
+          <span id="toggle-circle" class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform translate-x-1"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Intestazione Principale -->
+    <div class="text-center mb-10 max-w-2xl">
+      <h1 class="font-holiday mb-10 text-5xl sm:text-7xl md:text-8xl text-amber-300 drop-shadow-[0_4px_15px_rgba(212,175,55,0.4)]">
+        Il Calendario dell'Avvento GBS
+      </h1>
+      <p class="font-cinzel text-sm sm:text-base tracking-[0.25em] text-amber-200/90 mt-4 uppercase">
+        Verso la notte più magica dell'anno
+      </p>
+      <p class="text-xs text-rose-200/60 mt-2">
+        Ogni giorno dall'1 al 24 dicembre svela una nuova sorpresa: ricordi, pensieri, video e auguri.
+      </p>
+    </div>
+
+    <!-- Griglia delle 24 Caselle -->
+    <main id="calendar-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5 w-full">
+      <!-- Le 24 caselle verranno generate dinamicamente con JS -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-16 text-center text-xs text-amber-300/60 flex items-center gap-2">
+      <i data-lucide="gift" class="w-4 h-4 text-amber-400"></i>
+      <span>Buone Feste e Felice Attesa del Natale</span>
+    </footer>
+
+  </div>
+
+  <!-- MODALE DETTAGLIO SORPRESA -->
+  <div id="modal-container" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300">
+    <div id="modal-card" class="relative w-full max-w-lg bg-gradient-to-b from-[#250810] to-[#120306] border-2 border-amber-400/50 rounded-3xl p-6 sm:p-8 shadow-2xl transform scale-90 transition-all duration-300">
+      
+      <!-- Pulsante Chiusura -->
+      <button id="modal-close" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-red-950/80 border border-amber-400/50 flex items-center justify-center text-amber-300 hover:bg-amber-400 hover:text-red-950 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Badge Giorno -->
+      <div class="flex items-center gap-2 mb-4">
+        <div class="px-3 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-bold uppercase tracking-wider font-cinzel">
+          Giorno <span id="modal-day">1</span> Dicembre
+        </div>
+        <div id="modal-type-badge" class="px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/40 text-rose-300 text-xs font-medium">
+          Sorpresa
+        </div>
+      </div>
+
+      <!-- Titolo Sorpresa -->
+      <h3 id="modal-title" class="font-cinzel text-xl sm:text-2xl font-bold text-amber-100 mb-4">
+        Titolo
+      </h3>
+
+      <!-- Contenuto Multimediale (Immagine o Video) -->
+      <div id="modal-media-wrapper" class="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-amber-500/20 mb-4 flex items-center justify-center min-h-[200px] max-h-[320px]">
+        <!-- Immagine o iframe/video iniettati con JS -->
+      </div>
+
+      <!-- Messaggio o Dedica -->
+      <p id="modal-message" class="text-sm sm:text-base text-rose-100/90 leading-relaxed italic bg-black/20 p-4 rounded-xl border border-white/5">
+        Messaggio natalizio speciale.
+      </p>
+
+      <div class="mt-6 flex justify-end">
+        <button id="modal-action-btn" class="px-6 py-2 rounded-xl gold-gradient text-red-950 font-bold text-sm tracking-wider uppercase shadow-lg hover:brightness-110 active:scale-95 transition-all">
+          Chiudi Sorpresa
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // --- DATABASE DEI CONTENUTI DEI 24 GIORNI ---
+    // Puoi facilmente personalizzare immagini, video o testi per ciascun giorno!
+    const adventData = [
+      {
+        day: 1,
+        title: "Inizia il Viaggio: Accendiamo la Prima Candela",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1543258103-a62bdc069871?auto=format&fit=crop&w=800&q=80",
+        message: "Benvenuto a dicembre! Prepara una tazza calda di cioccolata: comincia oggi il conto alla rovescia più dolce dell'anno."
+      },
+      {
+        day: 2,
+        title: "Biscotti alla Cannella & Zenzero",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?auto=format&fit=crop&w=800&q=80",
+        message: "Il profumo di cannella riempie l'aria. Ricetta del giorno: dedicati una mezz'ora per infornare qualcosa di dolce."
+      },
+      {
+        day: 3,
+        title: "Caminetto & Melodie d'Inverno",
+        type: "video",
+        // Utilizziamo embed di YouTube con loop e muto piacevole
+        mediaUrl: "https://www.youtube.com/embed/L_LUpnjgPso?autoplay=1&mute=1&controls=0&loop=1",
+        message: "Lasciati cullare dal crepitio della legna e dalla tranquillità dell'inverno."
+      },
+      {
+        day: 4,
+        title: "Decorare l'Albero di Natale",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1512474932049-78ac69eed10c?auto=format&fit=crop&w=800&q=80",
+        message: "Palle di vetro colorate, nastri dorati e una stella in cima: ogni ornamento racchiude un ricordo prezioso."
+      },
+      {
+        day: 5,
+        title: "La Notte delle Fiabe",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1513297887119-d46091b24bfa?auto=format&fit=crop&w=800&q=80",
+        message: "Riscopri stasera una favola classica o un bel film natalizio con le persone a te care."
+      },
+      {
+        day: 6,
+        title: "Festa di San Nicola",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1544427920-c49ccfb85579?auto=format&fit=crop&w=800&q=80",
+        message: "Una calza ricca di mandarini e cioccolato per festeggiare la tradizione di San Nicola."
+      },
+      {
+        day: 7,
+        title: "Vigilia dell'Immacolata",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1543257580-7269da773bf5?auto=format&fit=crop&w=800&q=80",
+        message: "Le luci della città si accendono tutte insieme, trasformando ogni strada in un sentiero di fiaba."
+      },
+      {
+        day: 8,
+        title: "L'Immacolata & Il Presepe",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+        message: "Per tradizione oggi si accendono ufficialmente gli alberi e i presepi in tutte le case italiane. Buona festa!"
+      },
+      {
+        day: 9,
+        title: "Un Regalo Fatto a Mano",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80",
+        message: "Il valore di un regalo non sta nel prezzo, ma nel tempo e nel pensiero dedicati per realizzarlo."
+      },
+      {
+        day: 10,
+        title: "Paesaggio Innevato e Silenzio",
+        type: "video",
+        mediaUrl: "https://www.youtube.com/embed/5qap5aO4i9A?autoplay=1&mute=1&controls=0&loop=1",
+        message: "Fermati un istante ad ammirare la danza silenziosa della neve sui tetti delle case."
+      },
+      {
+        day: 11,
+        title: "Note di Jingle Bells",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1482517967863-00e15c9b44be?auto=format&fit=crop&w=800&q=80",
+        message: "Metti su la tua playlist natalizia preferita e canta a squarciagola: è scientificamente provato che scalda il cuore!"
+      },
+      {
+        day: 12,
+        title: "La Magia dei Mercatini",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1575440615460-705f3ca3977c?auto=format&fit=crop&w=800&q=80",
+        message: "Profumo di vin brulè, casette di legno illuminate e statuine artigianali: la magia del Nord."
+      },
+      {
+        day: 13,
+        title: "Santa Lucia, la Notte più Lunga",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1481833761820-0509d3217039?auto=format&fit=crop&w=800&q=80",
+        message: "Porta luce nei giorni più bui: accendi una candela alla finestra per illuminare il cammino di chi ami."
+      },
+      {
+        day: 14,
+        title: "I Maglioni Natalizi (Ugly Sweaters)",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1576723417715-6b408c988c23?auto=format&fit=crop&w=800&q=80",
+        message: "Non aver paura di sfoggiare il maglione con le renne o i campanellini: l'allegria natalizia non ha regole!"
+      },
+      {
+        day: 15,
+        title: "A Metà Strada!",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1512389142860-9c449e58a543?auto=format&fit=crop&w=800&q=80",
+        message: "Mancano esattamente 10 giorni a Natale! Fai una lista delle cose belle accadute in quest'anno."
+      },
+      {
+        day: 16,
+        title: "Biglietti d'Auguri Scritto a Mano",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=800&q=80",
+        message: "In un mondo di messaggi istantanei, una cartolina o lettera scritta col cuore è il regalo più prezioso."
+      },
+      {
+        day: 17,
+        title: "Danza dei Fiocchi di Neve",
+        type: "video",
+        mediaUrl: "https://www.youtube.com/embed/vz91QO5N53M?autoplay=1&mute=1&controls=0&loop=1",
+        message: "Guarda come la natura si veste del suo abito bianco più candido ed elegante."
+      },
+      {
+        day: 18,
+        title: "Pattinaggio sul Ghiaccio",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1482867996988-29ec3a0f1aac?auto=format&fit=crop&w=800&q=80",
+        message: "Lame affilate, sciarpe svolazzanti e risate sul ghiaccio: momenti d'inverno indimenticabili."
+      },
+      {
+        day: 19,
+        title: "Abbracci Caldi",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?auto=format&fit=crop&w=800&q=80",
+        message: "Il freddo fuori è solo una scusa in più per stringersi forte e farsi compagnia."
+      },
+      {
+        day: 20,
+        title: "La Slitta delle Renne",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1579208575657-c595a05383b7?auto=format&fit=crop&w=800&q=80",
+        message: "In Lapponia le renne sono già pronte: Rudolph ha acceso il suo naso rosso per guidare la rotta."
+      },
+      {
+        day: 21,
+        title: "Solstizio d'Inverno",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1483982258113-b72862e6cff6?auto=format&fit=crop&w=800&q=80",
+        message: "Da oggi le giornate ricominciano a guadagnare minuti di luce. Festeggiamo la rinascita del Sole."
+      },
+      {
+        day: 22,
+        title: "Canti sotto le Stelle",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1512909006721-3d6018887383?auto=format&fit=crop&w=800&q=80",
+        message: "Manca pochissimo. Senti la frenesia e la gioia nell'aria? Le case cominciano a riempirsi di famiglia."
+      },
+      {
+        day: 23,
+        title: "La Vigilia della Vigilia",
+        type: "image",
+        mediaUrl: "https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=800&q=80",
+        message: "I preparativi sono al culmine! Pentole che borbottano, regali impacchettati con nastrini dorati."
+      },
+      {
+        day: 24,
+        title: "La Magica Notte della Vigilia di Natale",
+        type: "video",
+        mediaUrl: "https://www.youtube.com/embed/79kpiZ_6y7c?autoplay=1&mute=1&controls=0&loop=1",
+        message: "È arrivato il momento tanto atteso! Possa questa notte magica portare pace, luce e immenso amore nella tua casa. Buon Natale!"
+      }
+    ];
+
+    // --- STATO DELL'APPLICAZIONE ---
+    let testMode = false;
+    let openedDoors = new Set();
+
+    // Carica stato caselle salvate in localStorage per persistenza
+    try {
+      const saved = localStorage.getItem('advent_opened_doors');
+      if (saved) {
+        openedDoors = new Set(JSON.parse(saved));
+      }
+    } catch(e) {
+      console.warn("Storage non accessibile:", e);
+    }
+
+    // --- CONTROLLO DATA REALE ---
+    const realNow = new Date();
+    const currentMonth = realNow.getMonth(); // 11 = Dicembre (0-indicizzato)
+    const currentRealDay = realNow.getDate();
+
+    // Aggiorna etichetta della data corrente
+    const optionsDate = { weekday: 'long', day: 'numeric', month: 'long' };
+    const dateStr = realNow.toLocaleDateString('it-IT', optionsDate);
+    document.getElementById('current-date-display').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+
+    /**
+     * Verifica se una data casella (1..24) è sbloccata
+     */
+    function isDoorAvailable(dayNumber) {
+      if (testMode) return true;
+      // Per essere sbloccata, deve essere Dicembre (mese 11) e il giorno deve essere >= dayNumber
+      if (currentMonth === 11 && currentRealDay >= dayNumber) {
+        return true;
+      }
+      return false;
+    }
+
+    // --- RENDER DELLE CASELLE ---
+    const gridContainer = document.getElementById('calendar-grid');
+
+    function renderCalendar() {
+      gridContainer.innerHTML = '';
+
+      adventData.forEach((item) => {
+        const isAvailable = isDoorAvailable(item.day);
+        const isOpened = openedDoors.has(item.day);
+        const isChristmasEve = item.day === 25;
+
+        // Creazione Card Casella (Pulsante pulito senza ante)
+        const card = document.createElement('div');
+        card.id = `card-day-${item.day}`;
+        card.className = `calendar-card relative aspect-square w-full rounded-2xl select-none cursor-pointer p-[2px] ${
+          !isAvailable ? 'locked opacity-75' : ''
+        } ${
+          isChristmasEve 
+            ? 'col-span-2 sm:col-span-1 md:col-span-2 aspect-auto sm:aspect-square bg-gradient-to-br from-amber-300 via-rose-500 to-amber-500' 
+            : (isOpened 
+                ? 'bg-gradient-to-br from-amber-400/70 via-rose-600/40 to-amber-600/50' 
+                : 'bg-gradient-to-br from-amber-500/30 via-red-950/60 to-amber-700/20')
+        }`;
+        
+        card.innerHTML = `
+          <div class="relative w-full h-full rounded-[14px] ${
+            isChristmasEve
+              ? 'bg-gradient-to-br from-[#73101c] via-[#520913] to-[#2c0409]'
+              : (isOpened
+                  ? 'bg-gradient-to-br from-[#3b0811] via-[#240409] to-[#140105]'
+                  : 'bg-gradient-to-br from-[#4a0a14] via-[#2f050c] to-[#1c0206]')
+          } p-3 sm:p-4 flex flex-col justify-between items-center text-center overflow-hidden border border-white/5">
+            
+            <!-- Intestazione superiore della casella -->
+            <div class="w-full flex justify-between items-center">
+              <span class="text-[9px] sm:text-[10px] font-cinzel tracking-wider text-amber-300/60 uppercase">Dicembre</span>
+              <div class="status-badge flex items-center justify-center">
+                ${
+                  !isAvailable 
+                    ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-300/50"></i>' 
+                    : (isOpened 
+                        ? '<span class="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-950/50 border border-emerald-500/30 px-1.5 py-0.5 rounded-full"><i data-lucide="check" class="w-2.5 h-2.5"></i> Aperta</span>' 
+                        : '<i data-lucide="sparkle" class="w-3.5 h-3.5 text-amber-300 animate-pulse"></i>')
+                }
+              </div>
+            </div>
+
+            <!-- Numero del Giorno -->
+            <div class="my-auto flex flex-col items-center">
+              <span class="font-cinzel text-3xl sm:text-4xl md:text-5xl font-extrabold ${
+                isChristmasEve ? 'gold-text' : (isOpened ? 'text-amber-200' : 'text-amber-300')
+              } drop-shadow-md">
+                ${item.day}
+              </span>
+              ${
+                isChristmasEve 
+                  ? '<span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-amber-300 mt-1">La Notte Santa</span>' 
+                  : ''
+              }
+            </div>
+
+            <!-- Footer interno della Card -->
+            <div class="w-full flex items-center justify-center gap-1.5 pt-1 text-[10px] ${
+              !isAvailable 
+                ? 'text-rose-200/40' 
+                : 'text-amber-200/80 group-hover:text-amber-300'
+            }">
+              <i data-lucide="${item.type === 'video' ? 'play-circle' : 'gift'}" class="w-3 h-3 text-amber-400"></i>
+              <span class="truncate max-w-[90px] sm:max-w-[120px] font-medium">
+                ${!isAvailable ? 'Bloccata' : (isOpened ? 'Rivedi' : 'Scopri')}
+              </span>
+            </div>
+
+          </div>
+        `;
+
+        // Click handler
+        card.addEventListener('click', () => handleCardClick(item));
+
+        gridContainer.appendChild(card);
+      });
+
+      // Refresh icone Lucide
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    // --- GESTIONE CLICK SULLA CASELLA ---
+    function handleCardClick(item) {
+      const isAvailable = isDoorAvailable(item.day);
+
+      if (!isAvailable) {
+        shakeCard(item.day);
+        showToast(`Non puoi aprire la casella prima del ${item.day} Dicembre!`);
+        return;
+      }
+
+      // Segna come aperta
+      openedDoors.add(item.day);
+      try {
+        localStorage.setItem('advent_opened_doors', JSON.stringify([...openedDoors]));
+      } catch(e) {}
+
+      // Aggiorna lo stato visivo della card (badge e stile)
+      renderCalendar();
+
+      // Apri direttamente la modale con la foto o video
+      openModal(item);
+    }
+
+    // Animazione di rifiuto / shake per caselle chiuse
+    function shakeCard(day) {
+      const cardElem = document.getElementById(`card-day-${day}`);
+      if (!cardElem) return;
+      cardElem.animate([
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-6px)' },
+        { transform: 'translateX(6px)' },
+        { transform: 'translateX(-4px)' },
+        { transform: 'translateX(4px)' },
+        { transform: 'translateX(0)' }
+      ], {
+        duration: 350,
+        easing: 'ease-in-out'
+      });
+    }
+
+    // --- MODALE DETTAGLIO SORPRESA ---
+    const modalContainer = document.getElementById('modal-container');
+    const modalCard = document.getElementById('modal-card');
+    const modalDay = document.getElementById('modal-day');
+    const modalTitle = document.getElementById('modal-title');
+    const modalMessage = document.getElementById('modal-message');
+    const modalMediaWrapper = document.getElementById('modal-media-wrapper');
+    const modalCloseBtn = document.getElementById('modal-close');
+    const modalActionBtn = document.getElementById('modal-action-btn');
+    const modalTypeBadge = document.getElementById('modal-type-badge');
+
+    function openModal(item) {
+      modalDay.textContent = item.day;
+      modalTitle.textContent = item.title;
+      modalMessage.textContent = item.message;
+      modalTypeBadge.textContent = item.type === 'video' ? 'Video Sorpresa' : 'Foto & Pensiero';
+
+      // Pulisci media precedente
+      modalMediaWrapper.innerHTML = '';
+
+      if (item.type === 'video') {
+        const iframe = document.createElement('iframe');
+        iframe.src = item.mediaUrl;
+        iframe.className = "w-full h-56 sm:h-64 rounded-xl border-0 shadow-lg";
+        iframe.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture";
+        iframe.allowFullscreen = true;
+        modalMediaWrapper.appendChild(iframe);
+      } else {
+        const img = document.createElement('img');
+        img.src = item.mediaUrl;
+        img.alt = item.title;
+        img.className = "w-full h-56 sm:h-64 object-cover rounded-xl shadow-lg transition-transform duration-500 hover:scale-105";
+        img.onerror = () => {
+          img.src = 'https://images.unsplash.com/photo-1543258103-a62bdc069871?auto=format&fit=crop&w=800&q=80';
+        };
+        modalMediaWrapper.appendChild(img);
+      }
+
+      // Mostra modale con transizione
+      modalContainer.classList.remove('opacity-0', 'pointer-events-none');
+      modalCard.classList.remove('scale-90');
+      modalCard.classList.add('scale-100');
+    }
+
+    function closeModal() {
+      modalContainer.classList.add('opacity-0', 'pointer-events-none');
+      modalCard.classList.add('scale-90');
+      modalCard.classList.remove('scale-100');
+      
+      // Stop ai video in riproduzione
+      setTimeout(() => {
+        modalMediaWrapper.innerHTML = '';
+      }, 300);
+
+      // Ri-renderizza per aggiornare icone "check"
+      renderCalendar();
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal);
+    modalActionBtn.addEventListener('click', closeModal);
+    modalContainer.addEventListener('click', (e) => {
+      if (e.target === modalContainer) closeModal();
+    });
+
+    // --- NOTIFICA TOAST ELEGANTE ---
+    function showToast(message) {
+      const existing = document.getElementById('advent-toast');
+      if (existing) existing.remove();
+
+      const toast = document.createElement('div');
+      toast.id = 'advent-toast';
+      toast.className = "fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl bg-red-950/95 border border-amber-400/50 text-amber-200 text-xs sm:text-sm font-medium shadow-2xl backdrop-blur-md flex items-center gap-3 transition-all duration-300 opacity-0 translate-y-3";
+      toast.innerHTML = `
+        <i data-lucide="lock" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
+        <span>${message}</span>
+      `;
+      document.body.appendChild(toast);
+      if (window.lucide) lucide.createIcons();
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('opacity-0', 'translate-y-3');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-3');
+        setTimeout(() => toast.remove(), 400);
+      }, 3500);
+    }
+
+    // --- TOGGLE TEST / ANTEPRIMA MODE ---
+    const toggleBtn = document.getElementById('test-mode-toggle');
+    const toggleCircle = document.getElementById('toggle-circle');
+
+    toggleBtn.addEventListener('click', () => {
+      testMode = !testMode;
+      if (testMode) {
+        toggleBtn.classList.remove('bg-gray-700');
+        toggleBtn.classList.add('bg-emerald-600');
+        toggleCircle.classList.remove('translate-x-1');
+        toggleCircle.classList.add('translate-x-6');
+        showToast("Modalità Test ATTIVA: Tutte le 24 caselle sono ora sbloccate per l'anteprima!");
+      } else {
+        toggleBtn.classList.remove('bg-emerald-600');
+        toggleBtn.classList.add('bg-gray-700');
+        toggleCircle.classList.remove('translate-x-6');
+        toggleCircle.classList.add('translate-x-1');
+        showToast("Modalità Reale ATTIVA: Si aprono solo fino al giorno corrente di Dicembre.");
+      }
+      renderCalendar();
+    });
+
+    // --- ANIMAZIONE NEVE SU CANVAS ---
+    const canvas = document.getElementById('snow-canvas');
+    const ctx = canvas.getContext('2d');
+    let flakes = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Snowflake {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * -canvas.height;
+        this.size = Math.random() * 2.5 + 0.8;
+        this.speed = Math.random() * 0.8 + 0.4;
+        this.velX = (Math.random() - 0.5) * 0.5;
+        this.opacity = Math.random() * 0.6 + 0.2;
+      }
+      update() {
+        this.y += this.speed;
+        this.x += this.velX;
+
+        if (this.y > canvas.height) {
+          this.reset();
+          this.y = 0;
+        }
+        if (this.x > canvas.width || this.x < 0) {
+          this.x = Math.random() * canvas.width;
+        }
+      }
+      draw() {
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // Popola fiocchi
+    const flakeCount = window.innerWidth < 768 ? 45 : 90;
+    for (let i = 0; i < flakeCount; i++) {
+      const f = new Snowflake();
+      f.y = Math.random() * canvas.height;
+      flakes.push(f);
+    }
+
+    function animateSnow() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      flakes.forEach(flake => {
+        flake.update();
+        flake.draw();
+      });
+      requestAnimationFrame(animateSnow);
+    }
+
+    // Inizializzazione iniziale
+    window.addEventListener('DOMContentLoaded', () => {
+      renderCalendar();
+      animateSnow();
+    });
+  </script>
+</body>
+</html>
