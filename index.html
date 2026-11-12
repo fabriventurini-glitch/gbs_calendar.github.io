@@ -167,7 +167,7 @@
       </h3>
 
       <!-- Contenuto Multimediale (Immagine o Video) -->
-      <div id="modal-media-wrapper" class="relative w-full rounded-2xl overflow-hidden bg-black/40 border border-amber-500/20 mb-4 flex items-center justify-center min-h-[200px] max-h-[320px]">
+      <div id="modal-media-wrapper" class="relative w-full rounded-2xl overflow-hidden bg-white/100 border border-amber-500/20 mb-4 flex items-center justify-center min-h-[350px] max-h-[450px]">
         <!-- Immagine o iframe/video iniettati con JS -->
       </div>
 
@@ -243,7 +243,7 @@
         day: 8,
         title: "L'Immacolata & Il Presepe",
         type: "image",
-        mediaUrl: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80",
+        mediaUrl: "https://i.imgur.com/DetuAQW.jpeg",
         message: "Per tradizione oggi si accendono ufficialmente gli alberi e i presepi in tutte le case italiane. Buona festa!"
       },
       {
@@ -555,7 +555,7 @@
         const img = document.createElement('img');
         img.src = item.mediaUrl;
         img.alt = item.title;
-        img.className = "w-full h-56 sm:h-64 object-cover rounded-xl shadow-lg transition-transform duration-500 hover:scale-105";
+        img.className = "w-full h-56 sm:h-64 object-contain rounded-xl transition-transform duration-500 hover:scale-105";
         img.onerror = () => {
           img.src = 'https://images.unsplash.com/photo-1543258103-a62bdc069871?auto=format&fit=crop&w=800&q=80';
         };
